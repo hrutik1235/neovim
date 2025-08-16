@@ -1,42 +1,40 @@
+
 return {
-  "zbirenbaum/copilot.lua",
-  cmd = "Copilot",
-  event = "InsertEnter",  -- Better event for triggering
-  build = ":Copilot auth",
+  "Exafunction/codeium.nvim",
+  dependencies = {
+    "AstroNvim/astrocore",
+    "nvim-lua/plenary.nvim",
+  },
+  event = "InsertEnter",
+  build = ":Codeium Auth",
   opts = {
+    enable_chat = true,
+    enable_tabnine = false,
+    tools = {
+      enable_ai_assistant = true,
+    },
+    virtual_text = {
+      enabled = true,
+      spacing = 4,
+      prefix = " ➜ ",
+      hl_mode = "combine",
+    },
     suggestion = {
       enabled = true,
-      auto_trigger = true,  -- Enable automatic suggestions
-      debounce = 75,
-      keymap = {
-        accept = "<M-l>",  -- Use Alt/Meta-l to accept
-        accept_word = false,
-        accept_line = false,
-        next = "<M-j>",
-        prev = "<M-k>",
-        dismiss = "<M-h>",
-      },
+      auto_trigger = true,
+      accept_key = "<C-g>",
+      debounce_ms = 200,
     },
-    panel = { enabled = false },  -- Disable panel if using cmp
   },
 
   config = function(_, opts)
-    require("copilot").setup(opts)
-
-    -- Set up integration with cmp if you're using it
-    if require("astrocore").is_available("cmp") then
-      require("copilot_cmp").setup()
-    end
-
-    -- Alternative manual accept function
-    vim.g.ai_accept = function()
-      local suggestion = require("copilot.suggestion")
-      if suggestion.is_visible() then
-        suggestion.accept()
-        return true
-      end
-      return false
-    end
+    require("codeium").setup(opts)
+    -- Remove any references to codeium.accept() or custom ai_accept functions.
+    -- Bindings via opts.accept_key or via :map are enough!
+    vim.keymap.set("i", "<C-g>", function()
+      -- Use the plugin’s mapping, not a manual function call.
+      return vim.fn["codeium#Accept"]() -- For codeium.vim; for .nvim, just use opts
+    end, { expr = true, noremap = true, silent = true })
   end,
 }
 
